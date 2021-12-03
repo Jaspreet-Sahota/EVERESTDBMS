@@ -1,21 +1,26 @@
-package assignment9;
-
 import java.sql.*;
 import java.util.*;
 
-public class Assignment9 {
+/**
+ * This program connects to the database with the provided details. It is a
+ * text-based interface that allows the user to interact with a database
+ * designed for a e-commerce system.
+ *
+ *
+ */
+public class JdbcOracleConnectionTemplate {
     public static void main(String[] args) {
         Connection conn1 = null;
         try {
             // registers Oracle JDBC driver - though this is no longer required
             // since JDBC 4.0, but added here for backward compatibility
             Class.forName("oracle.jdbc.OracleDriver");
-            String dbURL1 = "jdbc:oracle:thin:username/password@oracle12c.scs.ryerson.ca:1521:orcl12c";
+            String dbURL1 = "jdbc:oracle:thin:system/password@localhost:1521:orcl";
             /* This XE or local database that you installed on your laptop. 1521 is the default port for database, change according to what you used during installation. 
 			orcl is the sid, change according to what you setup during installation. */
             conn1 = DriverManager.getConnection(dbURL1);
             if (conn1 != null) {
-                System.out.println("Connected successfully! Welcome to the EVEREST DBMS!");
+                System.out.println("Connected with connection #1");
             }
             String line = "";
             Scanner scan = new Scanner(System.in);
@@ -24,10 +29,12 @@ public class Assignment9 {
             String table = "";
             String criteria = "";
             String[] total;
+            
             while (!exit) {
                 back = false;
                 table = "";
                 criteria = "";
+                //Menu text
                 System.out.println("Main Menu:");
                 System.out.println("1) Drop Tables");
                 System.out.println("2) Create Tables");
@@ -42,15 +49,14 @@ public class Assignment9 {
                 } catch (Exception e) {
                     //Catch force exit of program
                 }
-                if (line.length() == 1) {
+                if (line.length() == 1) {//Accept 1 length entries
                     String query = "";
-
                     switch (line) {
-                        case "e":
+                        case "e"://Exit
                             exit = true;
                             break;
                         case "1":
-                            //Add all drop args into query
+                            //Add all Drop lines into queries to be run
                             total = new String[]{
                                 "Drop Table categories Cascade Constraints",
                                 "Drop Table review Cascade Constraints",
@@ -62,7 +68,7 @@ public class Assignment9 {
                                 "DROP TABLE warehouse_department_records CASCADE CONSTRAINTS",
                                 "Drop Table member Cascade Constraints"
                             };
-                            for (String que : total) {//Create all the tables listed in the array
+                            for (String que : total) {//Run queries
                                 try (Statement stmt1 = conn1.createStatement()) {
                                     System.out.println(que);//DEBUGGING STATEMENT, REMOVE LATER
                                     stmt1.execute(que);
@@ -111,7 +117,6 @@ public class Assignment9 {
                                 + " Member_id VARCHAR2(12) References member(Member_id) NOT NULL," + " CONSTRAINT Order_fk FOREIGN KEY (Item_id) REFERENCES item(Item_id))",
                                 "CREATE TABLE review(" + " Review_id VARCHAR2(12) NOT NULL PRIMARY KEY," + " Member_id VARCHAR2(12) References member(Member_id) NOT NULL,"
                                 + " Rating NUMBER(1) NOT NULL," + " Content VARCHAR2(1000) NOT NULL," + " Item_id VARCHAR2(12) NOT NULL," + " CONSTRAINT Review_fk FOREIGN KEY(Item_id) References item(Item_id))"
-
                             };
                             for (String que : total) {//Create all the tables listed in the array
                                 try (Statement stmt1 = conn1.createStatement()) {
@@ -261,13 +266,13 @@ public class Assignment9 {
                                 + " FROM item, warehouse" + " WHERE warehouse.Warehouse_id = item.Warehouse_id"
                                 + " GROUP BY warehouse.Warehouse_id" + " ORDER BY warehouse.Warehouse_id ASC"
                             };
-                            for (String que : total) {//Queries
+                            for (String que : total) {//Run Queries
                                 try (Statement stmt4 = conn1.createStatement()) {
                                     System.out.println(que);//DEBUGGING STATEMENT, REMOVE LATER
                                     ResultSet rs4 = stmt4.executeQuery(que);
                                     ResultSetMetaData rsmd4 = rs4.getMetaData();
                                     int column = rsmd4.getColumnCount();
-                                    for (int i = 1; i <= column; i++) {
+                                    for (int i = 1; i <= column; i++) {//Print all columns(header)
                                         if (i == 1) {
                                             System.out.print("|");
                                         }
@@ -275,7 +280,7 @@ public class Assignment9 {
                                     }
                                     System.out.println();
                                     while (rs4.next()) {
-                                        for (int j = 1; j <= column; j++) {
+                                        for (int j = 1; j <= column; j++) {//Print all values gained from query
                                             if (j == 1) {
                                                 System.out.print("|");
                                             }
@@ -307,7 +312,7 @@ public class Assignment9 {
                                 table = scan.nextLine().toLowerCase();
                                 System.out.println("What will you use as your criteria?:");
                                 String[] choices;
-                                switch (table) {
+                                switch (table) {//Difference choices based on table
                                     case "1"://member
                                         choices = new String[]{"Member_id", "Username", "Password", "Name", "Address", "Credit_card_number", "CVV", "Expiry_date", "Email", "Vending_location"};
 
@@ -325,7 +330,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "2":
+                                    case "2"://Warehouse
                                         choices = new String[]{"Warehouse_id", "Warehouse_address"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -341,7 +346,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "3":
+                                    case "3"://Category
                                         choices = new String[]{"Category_id", "Category_name", "Category_description"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -357,7 +362,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "4":
+                                    case "4"://Item
                                         choices = new String[]{"Item_id", "Item_name", "Category_id", "Description", "Price", "Stock", "Location", "Warehouse_id"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -373,7 +378,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "5":
+                                    case "5"://Order
                                         choices = new String[]{"Order_id", "Item_id", "Member_id"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -389,7 +394,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "6":
+                                    case "6"://Review
                                         choices = new String[]{"Review_id", "Member_id", "Rating", "Content", "Item_id"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -405,7 +410,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "7":
+                                    case "7"://Warehouse_storage
                                         choices = new String[]{"Warehouse_id", "Warehouse_available_storage"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -421,7 +426,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "8":
+                                    case "8"://Warehouse department
                                         choices = new String[]{"Warehouse_id", "Warehouse_department_id"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -437,7 +442,7 @@ public class Assignment9 {
                                         }
                                         search = true;
                                         break;
-                                    case "9":
+                                    case "9"://Warehouse_department_records
                                         choices = new String[]{"Warehouse_department_id", "Warehouse_manager_id", "Warehouse_department_records"};
                                         while (!(criteria.equalsIgnoreCase("e") || Arrays.asList(choices).contains(criteria))) {//Get valid input
                                             System.out.println("Columns(Case sensitive):");
@@ -457,52 +462,43 @@ public class Assignment9 {
 
                             }
                             if (!back) {
-                                System.out.println("Please enter your search value:");
+                                System.out.println("Please enter your search value:");//Get value to search for
                                 String searchValue = scan.nextLine();
-                                switch (table) {
+                                switch (table) {//Make query on selected table with criteria for search value
                                     case "1":
-                                        //Member
                                         query = "SELECT * FROM member WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "2":
-                                        //Column name
                                         query = "SELECT * FROM warehouse WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "3":
-                                        //Column name
                                         query = "SELECT * FROM categories WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "4":
-                                        //Column name
                                         query = "SELECT * FROM item WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "5":
-                                        //Column name
                                         query = "SELECT * FROM orders WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "6":
-                                        //Column name
                                         query = "SELECT * FROM review WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "7":
-                                        //Column name
                                         query = "SELECT * FROM Warehouse_storage WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "8":
-                                        //Column name
                                         query = "SELECT * FROM warehouse_department WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                     case "9":
-                                        //Column name
                                         query = "SELECT * FROM warehouse_department_records WHERE " + criteria + "= '" + searchValue + "'";
                                         break;
                                 }
-                                try (Statement stmt5 = conn1.createStatement()) {
+                                try (Statement stmt5 = conn1.createStatement()) {//Run the query
                                     System.out.println(query);//DEBUGGING STATEMENT, REMOVE LATER
                                     ResultSet rs5 = stmt5.executeQuery(query);
                                     ResultSetMetaData rsmd5 = rs5.getMetaData();
                                     int column = rsmd5.getColumnCount();
-                                    for (int i = 1; i <= column; i++) {
+                                    for (int i = 1; i <= column; i++) {//Print columns/headers
                                         if (i == 1) {
                                             System.out.print("|");
                                         }
@@ -510,7 +506,7 @@ public class Assignment9 {
                                     }
                                     System.out.println();
                                     while (rs5.next()) {
-                                        for (int j = 1; j <= column; j++) {
+                                        for (int j = 1; j <= column; j++) {//Print values from search
                                             if (j == 1) {
                                                 System.out.print("|");
                                             }
@@ -694,7 +690,7 @@ public class Assignment9 {
                                 String newValue = scan.nextLine();
                                 System.out.println("Please enter your update clause(e.g. \"Name='RealName1'\":");
                                 String clause = scan.nextLine();
-                                switch (table) {
+                                switch (table) {//Make query based on table, criteria, new value, and the clause to update
                                     case "1":
                                         //Member
                                         query = "UPDATE member Set " + criteria + "='" + newValue + "' WHERE " + clause;
@@ -732,7 +728,7 @@ public class Assignment9 {
                                         query = "Update warehouse_department_records Set " + criteria + "='" + newValue + "' WHERE " + clause;
                                         break;
                                 }
-                                try (Statement stmt6 = conn1.createStatement()) {
+                                try (Statement stmt6 = conn1.createStatement()) {//Run statement
                                     System.out.println(query);//DEBUGGING STATEMENT, REMOVE LATER
                                     stmt6.executeQuery(query);
                                 } catch (SQLException e) {
@@ -751,12 +747,13 @@ public class Assignment9 {
                                 System.out.println("4) Item");
                                 System.out.println("5) Orders");
                                 System.out.println("6) Review");
+
                                 System.out.println("7) warehouse_storage");
                                 System.out.println("8) warehouse_department");
                                 System.out.println("9) warehouse_department_records");
                                 table = scan.nextLine().toLowerCase();
                                 String[] valid = {"1", "2", "3", "4", "5", "6", "7", "8", "9"};
-                                if (table.equalsIgnoreCase("e")) {
+                                if (table.equalsIgnoreCase("e")) {//Go back to menu
                                     back = true;
                                     delete = true;
                                 }
@@ -765,44 +762,44 @@ public class Assignment9 {
                                         System.out.println("Please enter your delete clause(e.g. \"Name='RealName1'\":");
                                         String clause = scan.nextLine();
                                         switch (table) {
-                                            case "1":
+                                            case "1"://Make delete query
                                                 //Member
                                                 query = "Delete From member" + " WHERE " + clause;
                                                 break;
                                             case "2":
-                                                //Column name
+                                                //warehouse
                                                 query = "Delete From warehouse" + " WHERE " + clause;
                                                 break;
                                             case "3":
-                                                //Column name
+                                                //categories
                                                 query = "Delete From categories" + " WHERE " + clause;
                                                 break;
                                             case "4":
-                                                //Column name
+                                                //item
                                                 query = "Delete From item" + " WHERE " + clause;
                                                 break;
                                             case "5":
-                                                //Column name
+                                                //orders
                                                 query = "Delete From orders" + " WHERE " + clause;
                                                 break;
                                             case "6":
-                                                //Column name
+                                                //review
                                                 query = "Delete From review" + " WHERE " + clause;
                                                 break;
                                             case "7":
-                                                //Column name
+                                                //warehouse_storage
                                                 query = "Delete From warehouse_storage" + " WHERE " + clause;
                                                 break;
                                             case "8":
-                                                //Column name
+                                                //warehouse_department
                                                 query = "Delete From warehouse_department" + " WHERE " + clause;
                                                 break;
                                             case "9":
-                                                //Column name
+                                                //warehouse_department_records
                                                 query = "Delete From warehouse_department_records" + " WHERE " + clause;
                                                 break;
                                         }
-                                        try (Statement stmt7 = conn1.createStatement()) {
+                                        try (Statement stmt7 = conn1.createStatement()) {//Run statement
                                             delete = true;
                                             System.out.println(query);//DEBUGGING STATEMENT, REMOVE LATER
                                             stmt7.executeQuery(query);
@@ -815,7 +812,7 @@ public class Assignment9 {
                             }
                             break;
                     }
-                    if (!exit) {
+                    if (!exit) {//Return to menu
                         System.out.println("Press Enter to continue:");
                         try {
                             scan.nextLine();
@@ -827,14 +824,14 @@ public class Assignment9 {
                     }
                 }
             }
-            try {
+            try {//Close connection
                 if (conn1 != null && !conn1.isClosed()) {
                     conn1.close();
                 }
             } catch (SQLException ex) {
                 ex.printStackTrace();
             }
-            scan.close();
+            scan.close();//Close scanner
         } catch (Exception e) {
             e.printStackTrace();
         }
