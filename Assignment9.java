@@ -15,7 +15,7 @@ public class Assignment9 {
 			orcl is the sid, change according to what you setup during installation. */
             conn1 = DriverManager.getConnection(dbURL1);
             if (conn1 != null) {
-                System.out.println("Connected with connection #1");
+                System.out.println("Connected successfully! Welcome to the EVEREST DBMS!");
             }
             String line = "";
             Scanner scan = new Scanner(System.in);
